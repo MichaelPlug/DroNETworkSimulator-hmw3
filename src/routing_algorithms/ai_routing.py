@@ -83,11 +83,6 @@ class AIRouting(BASE_routing):
          	appo = self.drone.v_star
         except: 
         	setattr(self.drone, 'v_star', {})   
-       
-        try:
-            appo = self.drone.q_dep
-        except:
-        	setattr(self.drone, 'q_dep', {})
             
 
 
@@ -269,12 +264,11 @@ class AIRouting(BASE_routing):
        			
         if mustGoBack:
             bd = self.bestDepot()
-        	if self.isGoingAway(bd):
-        		print("I'm going back")
-        		self.drone.mustGoBack = False
-                return -bd -1
-        	else:
-        		return None
+            if self.isGoingAway(bd):
+            	self.drone.mustGoBack = False
+            	return -bd -1
+            else:
+            	return None
 
         #we take our distance from the depot
         #best_drone_distance_from_depot = util.euclidean_distance(self.simulator.depot.coords, self.drone.coords)
@@ -581,7 +575,7 @@ class AIRouting(BASE_routing):
                 #at the end we perform the action to go to the depot, so
                 #we left the mission for this purpose
                 bd = self.bestDepot()
-                if self.isGoingAway():
+                if self.isGoingAway(bd):
                      return -bd-1
                 try: 
                      self.drone.mustGoBack = True
@@ -835,22 +829,7 @@ class AIRouting(BASE_routing):
         event_time_to_dead = (self.drone.tightest_event_deadline - cur_step) * self.drone.simulator.time_step_duration
         return event_time_to_dead - 5 < time_to_depot <= event_time_to_dead  # 5 seconds of tolerance
 
-    def bestDepot(self):
-        try:
-            appo = self.q_dep[0] > self.q_dep[1]
-        except:
-            distanza_depot_0 = util.euclidean_distance(self.simulator.depot.list_of_coords[0], self.drone.next_target())
-            
-            distanza_depot_1 =util.euclidean_distance(self.simulator.depot.list_of_coords[1], self.drone.next_target())
-            if distanza_depot_0 <= distanza_depot_1:
-                return 0
-            else:
-                return 1
-
-        if self.q_dep[0] > self.q_dep[1]:
-            return 0
-        elif self.q_dep[0] > self.q_dep[1]:
-            return 1
+    def bestDepot(self):     
         distanza_depot_0 = util.euclidean_distance(self.simulator.depot.list_of_coords[0], self.drone.next_target())
         
         distanza_depot_1 =util.euclidean_distance(self.simulator.depot.list_of_coords[1], self.drone.next_target())

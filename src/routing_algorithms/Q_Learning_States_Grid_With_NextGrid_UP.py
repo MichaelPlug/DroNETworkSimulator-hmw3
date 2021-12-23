@@ -60,7 +60,7 @@ class AIRouting(BASE_routing):
         self.taken_actions = {}  #id event : (old_action)
         setattr(self, 'count', 0)
 
-    def feedback(self, drone, id_event, delay, outcome):
+    def feedback(self, drone, id_event, delay, outcome, depot_index=None):
 
         """ return a possible feedback, if the destination drone has received the packet """
         # Packets that we delivered and still need a feedback
@@ -210,12 +210,17 @@ class AIRouting(BASE_routing):
 
 
             """
+
+
             # Packets that we delivered and still need a feedback
             print("Drone: ", self.drone.identifier, "---------- has delivered: ", self.taken_actions)
+
             # outcome == -1 if the packet/event expired; 0 if the packets has been delivered to the depot
             # Feedback from a delivered or expired packet
             print("Drone: ", self.drone.identifier, "---------- just received a feedback:",
                   "Drone:", drone, " - id-event:", id_event, " - delay:",  delay, " - outcome:", outcome)
+
+
             """
 
     def relay_selection(self, opt_neighbors, pkd):
@@ -504,10 +509,15 @@ class AIRouting(BASE_routing):
         else:
 
 
-
+            distanza_depot_1 = util.euclidean_distance(self.simulator.depot.list_of_coords[0], self.drone.next_target())
+            
+            distanza_depot_2 =util.euclidean_distance(self.simulator.depot.list_of_coords[1], self.drone.next_target())
+            "DEPOT 1 È RETURN -1, DEPOT 2 È RETURN -2"
 
             """ arg min score  -> geographical approach, take the drone closest to the depot """
-            best_drone_distance_from_depot = util.euclidean_distance(self.simulator.depot.coords, self.drone.coords)
+            best_drone_distance_from_depot = util.euclidean_distance(self.simulator.depot.list_of_coords[0], self.drone.coords)
+            
+            best_drone_distance_from_depot = 2
             max_action = None
 
 
@@ -638,7 +648,18 @@ class AIRouting(BASE_routing):
             for hpk, drone_istance in opt_neighbors:
 
                 exp_position = hpk.cur_pos  # without estimation, a simple geographic approach
-                exp_distance = util.euclidean_distance(exp_position, self.simulator.depot.coords)
+                
+              
+                
+                distanza_depot_1 = util.euclidean_distance(self.simulator.depot.list_of_coords[0], self.drone.next_target())
+                
+                distanza_depot_2 =util.euclidean_distance(self.simulator.depot.list_of_coords[1], self.drone.next_target())
+                "DEPOT 1 È RETURN -1, DEPOT 2 È RETURN -2"
+                
+                
+                
+                exp_distance = util.euclidean_distance(exp_position, self.simulator.depot.list_of_coords[0])
+                
                 if exp_distance < best_drone_distance_from_depot:
                     best_drone_distance_from_depot = exp_distance
                     max_action = drone_istance
@@ -701,30 +722,16 @@ class AIRouting(BASE_routing):
 
 
         """
+
         FINE
-        """
-
-
-
-
-
-
 
         """
-        # self.drone.history_path (which waypoint I traversed. We assume the mission is repeated)
-        # self.drone.residual_energy (that tells us when I'll come back to the depot).
-        #  .....
-        for hpk, drone_instance in opt_neighbors:
-            #print(hpk)
-            continue
-        # Store your current action --- you can add several stuff if needed to take a reward later
-        self.taken_action self.drone.q[pkd.event_ref.identifier] = (action)
-        # return action:
-        # None --> no transmission
-        # -1 --> move to depot
-        # 0, ... , self.ndrones --> send packet to this drone
-        return None  # here you should return a drone object!
-        """
+
+
+
+
+
+
 
     def print(self):
         """
@@ -799,28 +806,45 @@ class AIRouting(BASE_routing):
     			return (actual_grid, [actual_grid[0], actual_grid[1] -1])
     			
     def isGoingAway(self):
-    	a = util.euclidean_distance(self.simulator.depot.coords, self.drone.next_target())
-    	b = util.euclidean_distance(self.drone.coords, self.drone.next_target())
-    	c = util.euclidean_distance(self.simulator.depot.coords, self.drone.coords)
-    	if b == 0:
-    		return False
-    	if a == 0:
-    		return False
-    	if c == 0:
-    		return False
+        
+        distanza_depot_1 = util.euclidean_distance(self.simulator.depot.list_of_coords[0], self.drone.next_target())
+        
+        distanza_depot_2 =util.euclidean_distance(self.simulator.depot.list_of_coords[1], self.drone.next_target())
+        "DEPOT 1 È RETURN -1, DEPOT 2 È RETURN -2"
+        """
+        if (distanza_depot_1 > distanza_depot_2):
+        
+            dist = distanza_depot_2
+            
+        else:
+            
+            dist = distanza_depot_1
+        """
+        a = util.euclidean_distance(self.simulator.depot.list_of_coords[0], self.drone.next_target())
+        b = util.euclidean_distance(self.drone.coords, self.drone.next_target())
+        c = util.euclidean_distance(self.simulator.depot.list_of_coords[0], self.drone.coords)
     	
-    	import math
-    	arg = (b**2 + c**2 - a**2) / (2.0*b*c)
-    	if arg > 1.0: 		
-    		arg = 1
-    	if arg < -1.0:
+        if b == 0:
+            return False
+        if a == 0:
+            return False
+        if c == 0:
+            return False
+    	
+        import math
+        arg = (b**2 + c**2 - a**2) / (2.0*b*c)
+        if arg > 1.0: 		
+            arg = 1
+            
+        if arg < -1.0:
     	    	arg = -1
-    	alpha = math.acos(arg)
-    	return alpha >= math.pi/2
+        alpha = math.acos(arg)
+        return alpha >= math.pi/2
     	
     def imlating(self, cur_step):
         """ return true if exist a packet that is expiring and must be returned to the depot as soon as possible
             -> start to move manually to the depot.
+
             This method is optional, there is flag src.utilities.config.ROUTING_IF_EXPIRING
         """
         time_to_depot = util.euclidean_distance(self.drone.depot.coords, self.drone.coords) / self.drone.speed

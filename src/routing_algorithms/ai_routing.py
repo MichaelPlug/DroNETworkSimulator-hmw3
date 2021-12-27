@@ -93,8 +93,10 @@ class AIRouting(BASE_routing):
          	appo = self.drone.q_depot
         except:
         	setattr(self.drone, 'q_depot', {})
-
-
+        try:
+            self.drone.k = self.drone.k + 1
+        except:
+            setattr(self.drone, 'k', 1)
 
 
         #if the packet isn't still treated, then we train system for it
@@ -157,12 +159,12 @@ class AIRouting(BASE_routing):
             #it's important consider this update always, for each action done, also passing of packets
             try:
 
-                self.q_depot[drone_cell_index[0][0], drone_cell_index[0][1], drone_cell_index[1][0], drone_cell_index[1][1], depot_index] = self.q_depot[drone_cell_index[0][0], drone_cell_index[0][1], drone_cell_index[1][0], drone_cell_index[1][1], depot_index] + R
+                self.drone.q_depot[drone_cell_index[0][0], drone_cell_index[0][1], drone_cell_index[1][0], drone_cell_index[1][1], depot_index] = self.drone.q_depot[drone_cell_index[0][0], drone_cell_index[0][1], drone_cell_index[1][0], drone_cell_index[1][1], depot_index] + R
 
             except:
 
 
-                self.q_depot[drone_cell_index[0][0], drone_cell_index[0][1], drone_cell_index[1][0], drone_cell_index[1][1], depot_index] = 10 + R
+                self.drone.q_depot[drone_cell_index[0][0], drone_cell_index[0][1], drone_cell_index[1][0], drone_cell_index[1][1], depot_index] = 10 + R
 
 
             #in this way we also consider the action of return -1
@@ -300,11 +302,11 @@ class AIRouting(BASE_routing):
 
         bestDrone = self.drone
 
-        for pkt, d in opt_neighbord:
-       		if d.buffer_length() > 0::
-       				if compareQ(bestDrone, d):
-                        imthebest = False
-                        bestDrone = d
+        for pkt, d in opt_neighbors:
+       		if d.buffer_length() > 0:
+       			if self.compareQ(bestDrone, d):
+       			          imthebest = False
+       			          bestDrone = d
         if not imthebest:
             self.mustGoBack = False
             return bestDrone
@@ -324,6 +326,13 @@ class AIRouting(BASE_routing):
         #we generate a random value, for the epsilon-greedy strategy
         rand = random.random()
 
+        try:
+            n = self.drone.k
+        except:
+            setattr(self.drone, 'k', 0)
+            n = 0
+
+        epsilon = 1 - n/(n+1)
 
 
         #if we are in greedy case
@@ -916,15 +925,15 @@ class AIRouting(BASE_routing):
 
     def bestDepot(self, x1, y1, x2, y2):
         try:
-            q_dep1 = self.q_depot[x1, y1, x2, y2, -1]
+            q_dep1 = self.drone.q_depot[x1, y1, x2, y2, -1]
         except:
-            self.q_depot[x1, y1, x2, y2, -1] = 10
+            self.drone.q_depot[x1, y1, x2, y2, -1] = 10
             q_dep1 = 10
 
         try:
-            q_dep2 = self.q_depot[x1, y1, x2, y2, -2]
+            q_dep2 = self.drone.q_depot[x1, y1, x2, y2, -2]
         except:
-            self.q_dep[x1, y1, x2, y2, -2] = 10
+            self.drone.q_depot[x1, y1, x2, y2, -2] = 10
             q_dep2 = 10
 
         diff = q_dep1 - q_dep2
@@ -942,7 +951,7 @@ class AIRouting(BASE_routing):
         else:
             return 1
 
-    def compareQ(droneA, droneB):
+    def compareQ(self, droneA, droneB):
 
         gridA = self.get_grid_and_next_grid(droneA)
         gridB = self.get_grid_and_next_grid(droneB)
@@ -960,13 +969,13 @@ class AIRouting(BASE_routing):
         try:
             q_A = droneA.q[x1a, y1a, x2a, y2a, 0]
         except:
-            droneA.q[x1a, y1a, x2a, y2a, 0] = 10
+            #droneA.q[x1a, y1a, x2a, y2a, 0] = 10
             q_A = 10
 
         try:
             q_B = droneB.q[x1b, y1b, x2b, y2b, 0]
         except:
-            droneB.q[x1b, y1b, x2b, y2b, 0] = 10
+            #droneB.q[x1b, y1b, x2b, y2b, 0] = 10
             q_B = 10
 
         return q_B > q_A

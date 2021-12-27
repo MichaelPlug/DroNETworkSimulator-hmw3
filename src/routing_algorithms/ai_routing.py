@@ -943,9 +943,11 @@ class AIRouting(BASE_routing):
         elif diff < 0:
             return 1
 
-        distanza_depot_0 = util.euclidean_distance(self.simulator.depot.list_of_coords[0], self.drone.next_target())
+        #distanza_depot_0 = util.euclidean_distance(self.simulator.depot.list_of_coords[0], self.drone.next_target())
+        distanza_depot_0 = self.compute_distance_to_trajectory(self.drone, self.simulator.depot.list_of_coords[0])
+        #distanza_depot_1 =util.euclidean_distance(self.simulator.depot.list_of_coords[1], self.drone.next_target())
+        distanza_depot_1 = self.compute_distance_to_trajectory(self.drone, self.simulator.depot.list_of_coords[1])
 
-        distanza_depot_1 =util.euclidean_distance(self.simulator.depot.list_of_coords[1], self.drone.next_target())
         if distanza_depot_0 <= distanza_depot_1:
             return 0
         else:
@@ -979,3 +981,49 @@ class AIRouting(BASE_routing):
             q_B = 10
 
         return q_B > q_A
+
+    def compute_distance_to_trajectory(self, hello_packet, depot_coords):
+
+        #exp_position = self.compute_extimed_position(hello_packet)
+        exp_position = hello_packet.coords
+       # exp_position = hello_packet.cur_pos
+
+        #MAYBE IT SHOULD BE p1 = np.array([exp_position[0][0], exp_position[0][1]])
+        p1 = np.array([exp_position[0], exp_position[1]])
+        nt = hello_packet.next_target()
+        print(nt)
+        p2 = np.array([nt[0], nt[1]])
+        p3 = np.array([depot_coords[0],depot_coords[1]])
+
+        if np.linalg.norm(p2-p1) != 0:
+        	return np.linalg.norm(np.cross(p2-p1, p1-p3))/np.linalg.norm(p2-p1)
+        else:
+        	return 0
+
+    def compute_extimed_position(self, hello_packet):
+        """ estimate the current position of the drone """
+
+        # get known info about the neighbor drone
+        hello_message_time = hello_packet.time_step_creation
+        known_position = hello_packet.cur_pos
+        known_speed = hello_packet.speed
+        known_next_target = hello_packet.next_target
+
+        # compute the time elapsed since the message sent and now
+        # elapsed_time in seconds = elapsed_time in steps * step_duration_in_seconds
+        elapsed_time = (self.simulator.cur_step - hello_message_time) * self.simulator.time_step_duration  # seconds
+
+        # distance traveled by drone
+        distance_traveled = elapsed_time * known_speed
+
+        # direction vector
+        a, b = np.asarray(known_position), np.asarray(known_next_target)
+        if np.linalg.norm(b - a) != 0:
+        	v_ = (b - a) / np.linalg.norm(b - a)
+        else:
+        	v_ = 0
+
+        # compute the expect position
+        c = a + (distance_traveled * v_)
+
+        return tuple(c)

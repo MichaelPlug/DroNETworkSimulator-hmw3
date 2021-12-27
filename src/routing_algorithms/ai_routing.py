@@ -79,20 +79,20 @@ class AIRouting(BASE_routing):
         	appo = self.drone.q
         except:
         	setattr(self.drone, 'q', {})
-        		
+
         try:
          	appo = self.drone.s
-        except: 
+        except:
         	setattr(self.drone, 's', {})
-        	
+
         try:
          	appo = self.drone.v_star
-        except: 
-        	setattr(self.drone, 'v_star', {})   
+        except:
+        	setattr(self.drone, 'v_star', {})
         try:
          	appo = self.drone.q_depot
-        except: 
-        	setattr(self.drone, 'q_depot', {})          
+        except:
+        	setattr(self.drone, 'q_depot', {})
 
 
 
@@ -135,7 +135,7 @@ class AIRouting(BASE_routing):
             #maybe also for all the path of packets to incentive themÃ¹
 
 
-            
+
 
 
 
@@ -151,17 +151,17 @@ class AIRouting(BASE_routing):
 
             drone_cell_index = self.get_grid_and_next_grid(drone)
 
-        
-    
+
+
             #in this way we update the dictionary of the reward for the specific depot
             #it's important consider this update always, for each action done, also passing of packets
             try:
-                
+
                 self.q_depot[drone_cell_index[0][0], drone_cell_index[0][1], drone_cell_index[1][0], drone_cell_index[1][1], depot_index] = self.q_depot[drone_cell_index[0][0], drone_cell_index[0][1], drone_cell_index[1][0], drone_cell_index[1][1], depot_index] + R
-                
+
             except:
-                
-                
+
+
                 self.q_depot[drone_cell_index[0][0], drone_cell_index[0][1], drone_cell_index[1][0], drone_cell_index[1][1], depot_index] = 10 + R
 
 
@@ -172,7 +172,7 @@ class AIRouting(BASE_routing):
                 try:
 
                     self.drone.q[drone_cell_index[0][0], drone_cell_index[0][1], drone_cell_index[1][0], drone_cell_index[1][1], 2] = self.drone.q[drone_cell_index[0][0], drone_cell_index[0][1], drone_cell_index[1][0], drone_cell_index[1][1], 2] + alpha*(R + gamma* max_q - self.drone.q[drone_cell_index[0][0], drone_cell_index[0][1], drone_cell_index[1][0], drone_cell_index[1][1], 2] )
-                    
+
 
                 except Exception as e:
 
@@ -254,46 +254,60 @@ class AIRouting(BASE_routing):
         	appo = self.drone.q
         except:
         	setattr(self.drone, 'q', {})
-        		
+
         try:
          	appo = self.drone.s
-        except: 
+        except:
         	setattr(self.drone, 's', {})
-        	
+
         try:
          	appo = self.drone.v_star
-        except: 
-        	setattr(self.drone, 'v_star', {})  
+        except:
+        	setattr(self.drone, 'v_star', {})
         try:
          	appo = self.drone.q_depot
-        except: 
-        	setattr(self.drone, 'q_depot', {})    
-            
-        try: 
+        except:
+        	setattr(self.drone, 'q_depot', {})
+
+        try:
         	mustGoBack = self.drone.mustGoBack
         except:
         	mustGoBack = False
         	setattr(self.drone, 'mustGoBack', mustGoBack)
+
         for pkt, d in opt_neighbors:
         	if d.move_routing:
         		self.drone.mustGoBack = False
-        		return d        
-        		
+        		return d
+
        	for pkd, d in opt_neighbors:
        		try:
        			if d.mustGoBack:
        				return d
        		except:
        			continue
-     		  	
-       	
+
+
         if mustGoBack:
             bd = self.bestDepot(self_cell_index[0][0], self_cell_index[0][1], self_cell_index[1][0], self_cell_index[1][1])
             if self.isGoingAway(bd):
             	self.drone.mustGoBack = False
             	return -bd -1
             else:
-            	return None	
+            	return None
+
+        imthebest = True
+
+        bestDrone = self.drone
+
+        for pkt, d in opt_neighbord:
+       		if d.buffer_length() > 0::
+       				if compareQ(bestDrone, d):
+                        imthebest = False
+                        bestDrone = d
+        if not imthebest:
+            self.mustGoBack = False
+            return bestDrone
 
         #we take our distance from the depot
         #best_drone_distance_from_depot = util.euclidean_distance(self.simulator.depot.coords, self.drone.coords)
@@ -403,19 +417,19 @@ class AIRouting(BASE_routing):
 
                 #at the end we perform the action to go to the depot, so
                 #we left the mission for this purpose
-                
+
                 bd = self.bestDepot(self_cell_index[0][0], self_cell_index[0][1], self_cell_index[1][0], self_cell_index[1][1])
                 if self.isGoingAway(bd):
                      return -bd-1
-                
-                        
-                        
-                        
-                    
-                try: 
+
+
+
+
+
+                try:
                      self.drone.mustGoBack = True
                 except:
-                     setattr(self.drone, 'mustGoBack', True)	
+                     setattr(self.drone, 'mustGoBack', True)
                 return None
             #if the best choice to do is to pass the packet to the neighbors
             if (b >= a and b >= c):
@@ -490,10 +504,10 @@ class AIRouting(BASE_routing):
                         drone_cell_index = self.get_grid_and_next_grid(drone_istance)
 
                         try:
-                        
+
 
                             if (self.drone.q[drone_cell_index[0][0], drone_cell_index[0][1], drone_cell_index[1][0], drone_cell_index[1][1], i] > return_m):
-                            	return_m = self.drone.q[drone_cell_index[0][0], drone_cell_index[0][1], drone_cell_index[1][0], drone_cell_index[1][1], i]  
+                            	return_m = self.drone.q[drone_cell_index[0][0], drone_cell_index[0][1], drone_cell_index[1][0], drone_cell_index[1][1], i]
 
 
                         except:
@@ -518,7 +532,7 @@ class AIRouting(BASE_routing):
                      self.drone.mustGoBack = False
                      self.drone.s[(max_action.identifier, pkd.event_ref.identifier)] = (1, return_m)
 
-                
+
                 return max_action
 
 
@@ -531,22 +545,22 @@ class AIRouting(BASE_routing):
 
 
             distanza_depot_1 = util.euclidean_distance(self.simulator.depot.list_of_coords[0], self.drone.next_target())
-            
+
             distanza_depot_2 =util.euclidean_distance(self.simulator.depot.list_of_coords[1], self.drone.next_target())
             "DEPOT 1 È RETURN -1, DEPOT 2 È RETURN -2"
-            
+
             if (distanza_depot_1 <= distanza_depot_2):
-                
+
                 best_drone_distance_from_depot = util.euclidean_distance(self.simulator.depot.list_of_coords[0], self.drone.coords)
-                
+
             else:
-                
+
                 best_drone_distance_from_depot = util.euclidean_distance(self.simulator.depot.list_of_coords[1], self.drone.coords)
 
 
 
             """ arg min score  -> geographical approach, take the drone closest to the depot """
-            
+
             max_action = None
 
 
@@ -613,25 +627,25 @@ class AIRouting(BASE_routing):
                 #at the end we perform the action to go to the depot, so
                 #we left the mission for this purpose
                 distanza_depot_1 = util.euclidean_distance(self.simulator.depot.list_of_coords[0], self.drone.next_target())
-                    
+
                 distanza_depot_2 =util.euclidean_distance(self.simulator.depot.list_of_coords[1], self.drone.next_target())
 
-                    
+
                 if (distanza_depot_1 <= distanza_depot_2):
-                           
+
                         bd = 0
-                        
+
                 else:
                 	bd = 1
-                        
+
                 if self.isGoingAway(bd):
-                
+
                         return -bd -1
-                   
-                try: 
+
+                try:
                      self.drone.mustGoBack = True
                 except:
-                     setattr(self.drone, 'mustGoBack', True)	
+                     setattr(self.drone, 'mustGoBack', True)
                 return None
 
 
@@ -691,36 +705,36 @@ class AIRouting(BASE_routing):
             for hpk, drone_istance in opt_neighbors:
 
                 exp_position = hpk.cur_pos  # without estimation, a simple geographic approach
-                
-              
-                
+
+
+
                 distanza_depot_1 = util.euclidean_distance(self.simulator.depot.list_of_coords[0], self.drone.next_target())
-                
+
                 distanza_depot_2 =util.euclidean_distance(self.simulator.depot.list_of_coords[1], self.drone.next_target())
                 "DEPOT 1 È RETURN -1, DEPOT 2 È RETURN -2"
-                
+
                 if (distanza_depot_1 <= distanza_depot_2):
-                    
+
                     exp_distance = util.euclidean_distance(exp_position, self.simulator.depot.list_of_coords[0])
-                    
+
                 else:
-                    
+
                     exp_distance = util.euclidean_distance(exp_position, self.simulator.depot.list_of_coords[1])
-                
-                
-                
+
+
+
                 if exp_distance < best_drone_distance_from_depot:
                     best_drone_distance_from_depot = exp_distance
                     max_action = drone_istance
 
 
                     drone_cell_index = self.get_grid_and_next_grid(drone_istance)
-                                                                 
+
 
 
 
                     try:
-                    
+
                         return_m = self.drone.q[drone_cell_index[0][0], drone_cell_index[0][1], drone_cell_index[1][0], drone_cell_index[1][1], 1]
 
 
@@ -799,7 +813,7 @@ class AIRouting(BASE_routing):
 
 
     def get_grid_and_next_grid(self, drone):
-    	actual_grid = np.asarray(self.drone.coords) // self.simulator.prob_size_cell
+    	actual_grid = np.asarray(drone.coords) // self.simulator.prob_size_cell
     	agx = actual_grid[0]
     	agy = actual_grid[1]
     	future_grid = np.asarray(drone.next_target()) // self.simulator.prob_size_cell
@@ -811,7 +825,7 @@ class AIRouting(BASE_routing):
     	if (np.asarray(drone.next_target()) // self.simulator.prob_size_cell == actual_grid).any:
     		print(np.asarray(drone.next_target()) // self.simulator.prob_size_cell)
     		print(actual_grid)
-    		self.count = self.count -1 
+    		self.count = self.count -1
     	'''
 
 
@@ -853,29 +867,29 @@ class AIRouting(BASE_routing):
     			return (actual_grid, [actual_grid[0], actual_grid[1] +1])
     		else:
     			return (actual_grid, [actual_grid[0], actual_grid[1] -1])
-    			
+
     def isGoingAway(self, depot):
         a = util.euclidean_distance(self.simulator.depot.list_of_coords[depot], self.drone.next_target())
         b = util.euclidean_distance(self.drone.coords, self.drone.next_target())
         c = util.euclidean_distance(self.simulator.depot.list_of_coords[depot], self.drone.coords)
-    	
+
         if b == 0:
             return False
         if a == 0:
             return False
         if c == 0:
             return False
-    	
+
         import math
         arg = (b**2 + c**2 - a**2) / (2.0*b*c)
-        if arg > 1.0: 		
+        if arg > 1.0:
             arg = 1
-            
+
         if arg < -1.0:
     	    	arg = -1
         alpha = math.acos(arg)
         return alpha >= math.pi/2
-    	
+
     def imlating(self, cur_step):
         """ return true if exist a packet that is expiring and must be returned to the depot as soon as possible
             -> start to move manually to the depot.
@@ -883,43 +897,43 @@ class AIRouting(BASE_routing):
             This method is optional, there is flag src.utilities.config.ROUTING_IF_EXPIRING
         """
         distanza_depot_1 = util.euclidean_distance(self.simulator.depot.list_of_coords[0], self.drone.next_target())
-        
+
         distanza_depot_2 =util.euclidean_distance(self.simulator.depot.list_of_coords[1], self.drone.next_target())
         "DEPOT 1 È RETURN -1, DEPOT 2 È RETURN -2"
-        
+
         if (distanza_depot_1 <= distanza_depot_2):
-        
+
             dist = self.simulator.depot.list_of_coords[0]
-            
+
         else:
-            
+
             dist = self.simulator.depot.list_of_coords[1]
-        
-        
+
+
         time_to_depot = util.euclidean_distance(dist, self.drone.coords) / self.drone.speed
         event_time_to_dead = (self.drone.tightest_event_deadline - cur_step) * self.drone.simulator.time_step_duration
         return event_time_to_dead - 5 < time_to_depot <= event_time_to_dead  # 5 seconds of tolerance
- 			
+
     def bestDepot(self, x1, y1, x2, y2):
         try:
             q_dep1 = self.q_depot[x1, y1, x2, y2, -1]
         except:
             self.q_depot[x1, y1, x2, y2, -1] = 10
             q_dep1 = 10
-           
+
         try:
             q_dep2 = self.q_depot[x1, y1, x2, y2, -2]
         except:
             self.q_dep[x1, y1, x2, y2, -2] = 10
             q_dep2 = 10
-        
+
         diff = q_dep1 - q_dep2
-                        
+
         if diff > 0:
             return 0
         elif diff < 0:
             return 1
-          
+
         distanza_depot_0 = util.euclidean_distance(self.simulator.depot.list_of_coords[0], self.drone.next_target())
 
         distanza_depot_1 =util.euclidean_distance(self.simulator.depot.list_of_coords[1], self.drone.next_target())
@@ -927,4 +941,32 @@ class AIRouting(BASE_routing):
             return 0
         else:
             return 1
-            
+
+    def compareQ(droneA, droneB):
+
+        gridA = self.get_grid_and_next_grid(droneA)
+        gridB = self.get_grid_and_next_grid(droneB)
+
+        x1a = gridA[0][0]
+        y1a = gridA[0][1]
+        x2a = gridA[1][0]
+        y2a = gridA[1][1]
+
+        x1b = gridB[0][0]
+        y1b = gridB[0][1]
+        x2b = gridB[1][0]
+        y2b = gridB[1][1]
+
+        try:
+            q_A = droneA.q[x1a, y1a, x2a, y2a, 0]
+        except:
+            droneA.q[x1a, y1a, x2a, y2a, 0] = 10
+            q_A = 10
+
+        try:
+            q_B = droneB.q[x1b, y1b, x2b, y2b, 0]
+        except:
+            droneB.q[x1b, y1b, x2b, y2b, 0] = 10
+            q_B = 10
+
+        return q_B > q_A

@@ -276,6 +276,12 @@ class AIRouting(BASE_routing):
         except:
         	mustGoBack = False
         	setattr(self.drone, 'mustGoBack', mustGoBack)
+ 
+        try:
+        	mustGoBackEps = self.drone.mustGoBackEps
+        except:
+        	mustGoBackEps = False
+        	setattr(self.drone, 'mustGoBackEps', mustGoBack)        	
 
         for pkt, d in opt_neighbors:
         	if d.move_routing:
@@ -291,9 +297,18 @@ class AIRouting(BASE_routing):
 
 
         if mustGoBack:
-            bd = self.bestDepot(self_cell_index[0][0], self_cell_index[0][1], self_cell_index[1][0], self_cell_index[1][1])
+            if mustGoBackEps:
+            	distanza_depot_0 = self.compute_distance_to_trajectory(self.drone, self.simulator.depot.list_of_coords[0])
+            	distanza_depot_1 = self.compute_distance_to_trajectory(self.drone, self.simulator.depot.list_of_coords[1])
+            	if distanza_depot_0 <= distanza_depot_1:
+            		bd = 0
+            	else:
+            		bd = 1
+            else:
+            	bd = self.bestDepot(self_cell_index[0][0], self_cell_index[0][1], self_cell_index[1][0], self_cell_index[1][1])
             if self.isGoingAway(bd):
             	self.drone.mustGoBack = False
+            	self.drone.mustGoBackEps = False
             	return -bd -1
             else:
             	return None
@@ -553,18 +568,21 @@ class AIRouting(BASE_routing):
         else:
 
 
+            #distanza_depot_1 = compute_distance_to_trajectory(self.drone, self.simulator.depot.list_of_coords[0])
             distanza_depot_1 = util.euclidean_distance(self.simulator.depot.list_of_coords[0], self.drone.next_target())
 
-            distanza_depot_2 =util.euclidean_distance(self.simulator.depot.list_of_coords[1], self.drone.next_target())
+
+            distanza_depot_2 = distanza_depot_2 =util.euclidean_distance(self.simulator.depot.list_of_coords[1], self.drone.next_target())
+            #distanza_depot_2 = compute_distance_to_trajectory(self.drone, self.simulator.depot.list_of_coords[2])
             "DEPOT 1 È RETURN -1, DEPOT 2 È RETURN -2"
 
             if (distanza_depot_1 <= distanza_depot_2):
 
-                best_drone_distance_from_depot = util.euclidean_distance(self.simulator.depot.list_of_coords[0], self.drone.coords)
+                best_drone_distance_from_depot = distanza_depot_1
 
             else:
 
-                best_drone_distance_from_depot = util.euclidean_distance(self.simulator.depot.list_of_coords[1], self.drone.coords)
+                best_drone_distance_from_depot = distanza_depot_2
 
 
 
@@ -635,9 +653,9 @@ class AIRouting(BASE_routing):
 
                 #at the end we perform the action to go to the depot, so
                 #we left the mission for this purpose
-                distanza_depot_1 = util.euclidean_distance(self.simulator.depot.list_of_coords[0], self.drone.next_target())
+                distanza_depot_1 = compute_distance_to_trajectory(self.drone, self.simulator.depot.list_of_coords[0])
 
-                distanza_depot_2 =util.euclidean_distance(self.simulator.depot.list_of_coords[1], self.drone.next_target())
+                distanza_depot_2 = compute_distance_to_trajectory(self.drone, self.simulator.depot.list_of_coords[2])
 
 
                 if (distanza_depot_1 <= distanza_depot_2):
@@ -655,6 +673,10 @@ class AIRouting(BASE_routing):
                      self.drone.mustGoBack = True
                 except:
                      setattr(self.drone, 'mustGoBack', True)
+                try:
+                     self.drone.mustGoBackEps = True
+                except:
+                     setattr(self.drone, 'mustGoBackEps', True)                  
                 return None
 
 

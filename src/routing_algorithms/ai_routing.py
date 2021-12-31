@@ -530,19 +530,19 @@ class AIRouting(BASE_routing):
                         try:
 
 
-                            if (self.drone.q[drone_cell_index[0][0], drone_cell_index[0][1], drone_cell_index[1][0], drone_cell_index[1][1], i] > return_m):
-                            	return_m = self.drone.q[drone_cell_index[0][0], drone_cell_index[0][1], drone_cell_index[1][0], drone_cell_index[1][1], i]
+                            if (drone_istance.q[drone_cell_index[0][0], drone_cell_index[0][1], drone_cell_index[1][0], drone_cell_index[1][1], i] > return_m):
+                            	return_m = drone_istance.q[drone_cell_index[0][0], drone_cell_index[0][1], drone_cell_index[1][0], drone_cell_index[1][1], i]
 
 
                         except:
 
 
-                            self.drone.q[drone_cell_index[0][0], drone_cell_index[0][1], drone_cell_index[1][0], drone_cell_index[1][1], i] = 10
+                            drone_istance.q[drone_cell_index[0][0], drone_cell_index[0][1], drone_cell_index[1][0], drone_cell_index[1][1], i] = 10
 
 
-                            if (self.drone.q[drone_cell_index[0][0], drone_cell_index[0][1], drone_cell_index[1][0], drone_cell_index[1][1], i] > return_m):
+                            if (drone_istance.q[drone_cell_index[0][0], drone_cell_index[0][1], drone_cell_index[1][0], drone_cell_index[1][1], i] > return_m):
 
-                                return_m = self.drone.q[drone_cell_index[0][0], drone_cell_index[0][1], drone_cell_index[1][0], drone_cell_index[1][1], i]
+                                return_m = drone_istance.q[drone_cell_index[0][0], drone_cell_index[0][1], drone_cell_index[1][0], drone_cell_index[1][1], i]
 
 
                 #save everything for the capturing of the reward in

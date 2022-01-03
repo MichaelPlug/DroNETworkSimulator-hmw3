@@ -27,7 +27,7 @@ Attributes that one needs tweak often are tagged with # ***
 # ----------------------------------------------------------------------------------
 
 # ----------------------- PATH DRONES -----------------------------------------#
-SWEEP_PATH = True
+SWEEP_PATH = False
 LENGHT_METERS_TOUR = 30000 # (DO NOT CHANGE)
 HOVERING = 600  # int : steps of hovering
 CIRCLE_PATH = False # bool: whether to use cirlce paths around the depot
@@ -106,7 +106,7 @@ class ChannelError(Enum):
     GAUSSIAN = 2
     NO_ERROR = 3
     ON_DEVICE = 4
-    
+
     @staticmethod
     def keylist():
         return list(map(lambda c: c.name, ChannelError))
